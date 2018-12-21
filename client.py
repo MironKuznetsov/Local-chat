@@ -27,7 +27,7 @@ def on_closing(event=None):
 
 
 top = tkinter.Tk()
-top.title("MIPT chat")
+top.title("Local chat")
 
 messages_frame = tkinter.Frame(top)
 my_msg = tkinter.StringVar()
