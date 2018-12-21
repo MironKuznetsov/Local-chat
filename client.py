@@ -34,7 +34,7 @@ my_msg = tkinter.StringVar()
 my_msg.set("Type here")
 scrollbar_y = tkinter.Scrollbar(messages_frame)
 
-msg_list = tkinter.Listbox(messages_frame, height=20, width=70, yscrollcommand=scrollbar_y.set)
+msg_list = tkinter.Listbox(messages_frame, height=35, width=150, yscrollcommand=scrollbar_y.set)
 scrollbar_y.pack(side=tkinter.RIGHT, fill=tkinter.Y)
 msg_list.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
 msg_list.pack()
@@ -48,7 +48,7 @@ send_button.pack()
 
 top.protocol("WM_DELETE_WINDOW", on_closing)
 
-
+# HOST = '25.69.126.127'
 HOST = input('Enter host: ')
 # PORT = input('Enter port: ')
 # if not PORT:
