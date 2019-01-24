@@ -118,7 +118,7 @@ def broadcast(receiver_name, msg, prefix=""):
         sock_of_sender = str(get_key(clients, receiver_name))
         ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'')+8:str(sock_of_sender).find('raddr=(\'')+21]
 
-        with urllib.request.urlopen("https://geoip-db.com/json") as url:
+        with urllib.request.urlopen("https://geoip-db.com/jsonp"+ip_sender) as url:
             data = json.loads(url.read().decode())
             print(data)
             geo = data['country_code'] + ',' + data['country_name'] + ',' + data['city']
