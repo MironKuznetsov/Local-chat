@@ -3,11 +3,21 @@
 from datetime import datetime
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
+import os
+import subprocess
 # from pyweatherbit.api import Api
+
+
+import urllib.request
+import json
+
+
+
 
 clients = {}
 addresses = {}
 HOST = '25.69.126.127'
+# HOST = '10.55.200.133'
 # 10.55.123.58
 # 25.69.126.127
 # '192.168.1.57'
@@ -37,7 +47,13 @@ def handle_client(client):
     welcome = 'Welcome %s! If you ever want to quit, type "/q" to exit.' % name
     client.send(bytes(welcome, "utf8"))
     msg = "%s has joined the chat!" % name
-    broadcast(name, bytes(msg, "utf8"))
+
+    sock_of_sender = client
+    ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'') + 8:str(sock_of_sender).find('raddr=(\'')+21]
+    prefix = '<ip:' + ip_sender + '> name: '
+    print(prefix, client)
+
+    broadcast(name, bytes(msg, "utf8"), prefix)
     clients[client] = name
     bot_time = 0
     while True:
@@ -50,7 +66,7 @@ def handle_client(client):
                 string = str(list(clients.values()))
                 broadcast_whisper(bytes(name,"utf8"), bytes(string,"utf8"), "BOT: they are in room now \n", '')
             if msg == bytes("/time", "utf8"):
-                broadcast_whisper(bytes(name,"utf8"), b'', datetime.strftime(datetime.now(), "%d.%m.%Y-%H:%M:%S"), '')
+                broadcast_whisper(bytes(name,"utf8"), b'', datetime.strftime(datetime.now(), "BOT: real time is %d.%m.%Y-%H:%M:%S"), '')
             # if msg == bytes("/weather", "utf8"):
             #     string = "description: " + forecast.json["data"][0]["weather"]['description'] + "\nmax_temp: " + forecast.json["data"][0]["max_temp"] + "\nmin_temp: " + forecast.json["data"][0]["min_temp"]
             #     broadcast_whisper(name.decode("utf8"), string.decode("utf8"), "BOT: The weather is\n")
@@ -83,7 +99,7 @@ def broadcast_whisper(receiver_name, msg, prefix, name):
         sock = get_key(clients, receiver_name.decode("utf-8"))
         if 'BOT' not in prefix:
             sock_of_sender = str(get_key(clients, name))
-            ip_sender = str(sock_of_sender)[str(sock_of_sender).find('laddr=(\'') + 8:str(sock_of_sender).find('\',')]
+            ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'') + 8:str(sock_of_sender).find('raddr=(\'')+21]
             prefix = prefix[:-2] + '<ip:' + ip_sender + '>: '
         if len(name) != 0:
             sock_host = get_key(clients, name)
@@ -98,9 +114,22 @@ def get_key(d, value):
 
 
 def broadcast(receiver_name, msg, prefix=""):
-    sock_of_sender = str(get_key(clients, receiver_name))
-    ip_sender = str(sock_of_sender)[str(sock_of_sender).find('laddr=(\'')+8:str(sock_of_sender).find('\',')]
-    prefix = prefix[:-2] + '<ip:'+ip_sender+'>: '
+    if '<ip:' not in prefix:
+        sock_of_sender = str(get_key(clients, receiver_name))
+        ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'')+8:str(sock_of_sender).find('raddr=(\'')+21]
+
+        with urllib.request.urlopen("https://geoip-db.com/json") as url:
+            data = json.loads(url.read().decode())
+            print(data)
+            geo = data['country_code'] + ',' + data['country_name'] + ',' + data['city']
+
+        # cmd = ['ls']
+        # output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+        # print(output)
+
+        # geo = '1'
+        # geo = os.system("ls")
+        prefix = prefix[:-2] + '<ip:'+ip_sender+'> ' + 'from ' + geo + ' writes: '
     for sock in clients:
         sock.send(bytes(prefix, "utf8")+msg)
 
