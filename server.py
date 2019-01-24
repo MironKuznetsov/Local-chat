@@ -16,7 +16,7 @@ import json
 
 clients = {}
 addresses = {}
-HOST = '25.69.126.127'
+HOST = '104.248.82.4'
 # HOST = '10.55.200.133'
 # 10.55.123.58
 # 25.69.126.127
@@ -99,7 +99,7 @@ def broadcast_whisper(receiver_name, msg, prefix, name):
         sock = get_key(clients, receiver_name.decode("utf-8"))
         if 'BOT' not in prefix:
             sock_of_sender = str(get_key(clients, name))
-            ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'') + 8:str(sock_of_sender).find('raddr=(\'')+21]
+            ip_sender = str(sock_of_sender).split('\'')[3]
             prefix = prefix[:-2] + '<ip:' + ip_sender + '>: '
         if len(name) != 0:
             sock_host = get_key(clients, name)
@@ -116,12 +116,12 @@ def get_key(d, value):
 def broadcast(receiver_name, msg, prefix=""):
     if '<ip:' not in prefix:
         sock_of_sender = str(get_key(clients, receiver_name))
-        ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'')+8:str(sock_of_sender).find('raddr=(\'')+21]
-
-        with urllib.request.urlopen("https://geoip-db.com/jsonp"+ip_sender) as url:
-            data = json.loads(url.read().decode())
+        # ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'')+8:str(sock_of_sender).find('raddr=(\'')+21]
+        ip_sender = str(sock_of_sender).split('\'')[3]
+        with urllib.request.urlopen("https://geoip-db.com/jsonp/"+ip_sender) as url:
+            data = url.split('\"')
             print(data)
-            geo = data['country_code'] + ',' + data['country_name'] + ',' + data['city']
+            geo = data[3] + ',' + data[7] + ',' + data[11]
 
         # cmd = ['ls']
         # output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
