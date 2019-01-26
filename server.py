@@ -1,15 +1,11 @@
-# import os
-# os.system("pip install pyweatherbit")
+
 from datetime import datetime
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
-import os
-import subprocess
-# from pyweatherbit.api import Api
+
 
 
 import urllib.request
-import json
 
 
 
@@ -17,20 +13,11 @@ import json
 clients = {}
 addresses = {}
 HOST = '104.248.82.4'
-# HOST = '10.55.200.133'
-# 10.55.123.58
-# 25.69.126.127
-# '192.168.1.57'
 PORT = 33000
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 SERVER = socket(AF_INET, SOCK_STREAM)
 SERVER.bind(ADDR)
-
-# api_key = "9b79a1a03c414bc58dc6a87f13c941d5"
-# api = Api(api_key)
-# api.set_granularity('daily')
-# forecast = api.get_forecast(city="Moscow")
 
 def accept_incoming_connections():
     while True:
@@ -67,9 +54,6 @@ def handle_client(client):
                 broadcast_whisper(bytes(name,"utf8"), bytes(string,"utf8"), "BOT: they are in room now \n", '')
             if msg == bytes("/time", "utf8"):
                 broadcast_whisper(bytes(name,"utf8"), b'', datetime.strftime(datetime.now(), "BOT: real time is %d.%m.%Y-%H:%M:%S"), '')
-            # if msg == bytes("/weather", "utf8"):
-            #     string = "description: " + forecast.json["data"][0]["weather"]['description'] + "\nmax_temp: " + forecast.json["data"][0]["max_temp"] + "\nmin_temp: " + forecast.json["data"][0]["min_temp"]
-            #     broadcast_whisper(name.decode("utf8"), string.decode("utf8"), "BOT: The weather is\n")
             if msg == bytes("/quit", "utf8"):
                 broadcast_whisper(bytes(name,"utf8"), b'', "BOT: goodbye!)", '')
                 bot_time = 0
@@ -116,19 +100,18 @@ def get_key(d, value):
 def broadcast(receiver_name, msg, prefix=""):
     if '<ip:' not in prefix:
         sock_of_sender = str(get_key(clients, receiver_name))
-        # ip_sender = str(sock_of_sender)[str(sock_of_sender).find('raddr=(\'')+8:str(sock_of_sender).find('raddr=(\'')+21]
         ip_sender = str(sock_of_sender).split('\'')[3]
         with urllib.request.urlopen("https://geoip-db.com/jsonp/"+ip_sender) as url:
-            data = url.split('\"')
-            print(data)
+
+            html_response = url.read()
+            encoding = url.headers.get_content_charset('utf-8')
+            decoded_html = html_response.decode(encoding)
+
+
+            print(type(decoded_html), decoded_html)
+            data = decoded_html.split('\"')
+            # print(data)
             geo = data[3] + ',' + data[7] + ',' + data[11]
-
-        # cmd = ['ls']
-        # output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-        # print(output)
-
-        # geo = '1'
-        # geo = os.system("ls")
         prefix = prefix[:-2] + '<ip:'+ip_sender+'> ' + 'from ' + geo + ' writes: '
     for sock in clients:
         sock.send(bytes(prefix, "utf8")+msg)

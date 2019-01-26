@@ -48,13 +48,9 @@ send_button.pack()
 
 top.protocol("WM_DELETE_WINDOW", on_closing)
 
-# HOST = '25.69.126.127'
+
 HOST = input('Enter host: ')
-# PORT = input('Enter port: ')
-# if not PORT:
-#     PORT = 33000
-# else:
-#     PORT = int(PORT)
+
 PORT = 33000
 
 BUFSIZ = 1024
